@@ -167,6 +167,7 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os == 'Linux':
             # TODO : GTK3
             # cmake.definitions['wxBUILD_TOOLKIT'] = 'gtk3'
+            cmake.definitions['wxBUILD_TOOLKIT'] = 'gtk2'
             cmake.definitions['wxUSE_CAIRO'] = self.options.cairo
 
         # 3rd-party libraries
@@ -199,7 +200,8 @@ class wxWidgetsConan(ConanFile):
         return cmake
 
     def build(self):
-        self.source()
+        if not os.path.exists(self.source_subfolder):
+            self.source()
         cmake = self.configure_cmake()
         cmake.build()
 
