@@ -85,10 +85,8 @@ class wxWidgetsConan(ConanFile):
                     arch_suffix = ':i386'
                 elif self.settings.arch == 'x86_64':
                     arch_suffix = ':amd64'
-                packages = ['libx11-dev%s' % arch_suffix,
-                            'libgtk2.0-dev%s' % arch_suffix]
-                # TODO : GTK3
-                # packages.append('libgtk-3-dev%s' % arch_suffix)
+                packages = ['libx11-dev%s' % arch_suffix]
+                packages.append('libgtk-3-dev%s' % arch_suffix)
                 if self.options.secretstore:
                     packages.append('libsecret-1-dev%s' % arch_suffix)
                 if self.options.opengl:
@@ -96,9 +94,7 @@ class wxWidgetsConan(ConanFile):
                                      'libgl1-mesa-dev%s' % arch_suffix])
                 if self.options.webview:
                     packages.extend(['libsoup2.4-dev%s' % arch_suffix,
-                                     'libwebkitgtk-dev%s' % arch_suffix])
-                # TODO : GTK3
-                #                    'libwebkitgtk-3.0-dev%s' % arch_suffix])
+                                     'libwebkit2gtk-4.0-dev%s' % arch_suffix])
                 if self.options.mediactrl:
                     packages.extend(['libgstreamer0.10-dev%s' % arch_suffix,
                                      'libgstreamer-plugins-base0.10-dev%s' % arch_suffix])
@@ -125,12 +121,8 @@ class wxWidgetsConan(ConanFile):
 
     def source(self):
         source_url = "https://github.com/wxWidgets/wxWidgets"
-        source_tarball_url = "{0}/archive/v{1}.tar.gz".format(
-            source_url, self.version)
-        print(source_tarball_url)
-        tools.get(source_tarball_url)
-        extracted_dir = "wxWidgets-" + self.version
-        os.rename(extracted_dir, self.source_subfolder)
+        git = tools.Git(folder=self.source_subfolder)
+        git.clone(source_url, "master")
 
     def add_libraries_from_pc(self, library):
         pkg_config = tools.PkgConfig(library)
@@ -165,9 +157,7 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os != 'Windows':
             cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
         if self.settings.os == 'Linux':
-            # TODO : GTK3
-            # cmake.definitions['wxBUILD_TOOLKIT'] = 'gtk3'
-            cmake.definitions['wxBUILD_TOOLKIT'] = 'gtk2'
+            cmake.definitions['wxBUILD_TOOLKIT'] = 'gtk3'
             cmake.definitions['wxUSE_CAIRO'] = self.options.cairo
 
         # 3rd-party libraries
@@ -221,7 +211,7 @@ class wxWidgetsConan(ConanFile):
         debug = 'd' if self.settings.build_type == 'Debug' else ''
         if self.settings.os == 'Linux':
             prefix = 'wx_'
-            toolkit = 'gtk2'
+            toolkit = 'gtk3'
             version = ''
             suffix = '-%s.%s' % (version_major, version_minor)
         elif self.settings.os == 'Macos':
@@ -285,7 +275,7 @@ class wxWidgetsConan(ConanFile):
             self.cpp_info.defines.append('WXUSINGDLL')
         if self.settings.os == 'Linux':
             self.cpp_info.defines.append('__WXGTK__')
-            self.add_libraries_from_pc('gtk+-2.0')
+            self.add_libraries_from_pc('gtk+-3.0')
             self.add_libraries_from_pc('x11')
             self.cpp_info.libs.extend(['dl', 'pthread'])
         elif self.settings.os == 'Macos':

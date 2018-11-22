@@ -1,0 +1,1 @@
+./configure --with-x11 --disable-shared --enable-log --enable-debug --with-cxx=17
