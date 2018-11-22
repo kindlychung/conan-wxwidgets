@@ -122,7 +122,7 @@ class wxWidgetsConan(ConanFile):
     def source(self):
         source_url = "https://github.com/kindlychung/wxWidgets"
         git = tools.Git(folder=self.source_subfolder)
-        git.clone(source_url, "ky_gtk3_build")
+        git.clone(source_url, "gtk3")
 
     def add_libraries_from_pc(self, library):
         pkg_config = tools.PkgConfig(library)
