@@ -7,7 +7,7 @@ import os
 
 class wxWidgetsConan(ConanFile):
     name = "wxwidgets"
-    version = "3.1.1"
+    version = "3.1.2"
     description = "wxWidgets is a C++ library that lets developers create applications for Windows, Mac OS X, " \
                   "Linux and other platforms with a single code base."
     url = "https://github.com/bincrafters/conan-libname"
