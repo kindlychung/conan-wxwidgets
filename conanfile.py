@@ -120,9 +120,9 @@ class wxWidgetsConan(ConanFile):
             self.requires.add('expat/2.2.5@bincrafters/stable')
 
     def source(self):
-        source_url = "https://github.com/kindlychung/wxWidgets"
-        git = tools.Git(folder=self.source_subfolder)
-        git.clone(source_url, "gtk3")
+        source_url = "https://github.com/kindlychung/wxWidgets.git"
+        branch_name = "gtk3"
+        self.run("git clone {} --branch={}".format(source_url, branch_name))
 
     def add_libraries_from_pc(self, library):
         pkg_config = tools.PkgConfig(library)
