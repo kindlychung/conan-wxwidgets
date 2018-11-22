@@ -18,6 +18,7 @@ class wxWidgetsConan(ConanFile):
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
+    should_build = True
     options = {"shared": [True, False],
                "fPIC": [True, False],
                "unicode": [True, False],
@@ -31,7 +32,8 @@ class wxWidgetsConan(ConanFile):
                "aui": [True, False],
                "opengl": [True, False],
                "html": [True, False],
-               "mediactrl": [True, False],  # disabled by default as wxWidgets still uses deprecated GStreamer 0.10
+               # disabled by default as wxWidgets still uses deprecated GStreamer 0.10
+               "mediactrl": [True, False],
                "propgrid": [True, False],
                "debugreport": [True, False],
                "ribbon": [True, False],
@@ -45,7 +47,7 @@ class wxWidgetsConan(ConanFile):
     default_options = "shared=False",\
                       "fPIC=True",\
                       "unicode=True",\
-                      "compatibility=3.0",\
+                      "compatibility=3.1",\
                       "zlib=zlib",\
                       "png=libpng",\
                       "jpeg=libjpeg",\
@@ -123,14 +125,18 @@ class wxWidgetsConan(ConanFile):
 
     def source(self):
         source_url = "https://github.com/wxWidgets/wxWidgets"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
+        source_tarball_url = "{0}/archive/v{1}.tar.gz".format(
+            source_url, self.version)
+        print(source_tarball_url)
+        tools.get(source_tarball_url)
         extracted_dir = "wxWidgets-" + self.version
         os.rename(extracted_dir, self.source_subfolder)
 
     def add_libraries_from_pc(self, library):
         pkg_config = tools.PkgConfig(library)
         libs = [lib[2:] for lib in pkg_config.libs_only_l]  # cut -l prefix
-        lib_paths = [lib[2:] for lib in pkg_config.libs_only_L]  # cut -L prefix
+        lib_paths = [lib[2:]
+                     for lib in pkg_config.libs_only_L]  # cut -L prefix
         self.cpp_info.libs.extend(libs)
         self.cpp_info.libdirs.extend(lib_paths)
         self.cpp_info.sharedlinkflags.extend(pkg_config.libs_only_other)
@@ -153,7 +159,8 @@ class wxWidgetsConan(ConanFile):
 
         # platform-specific options
         if self.settings.compiler == 'Visual Studio':
-            cmake.definitions['wxBUILD_USE_STATIC_RUNTIME'] = 'MT' in str(self.settings.compiler.runtime)
+            cmake.definitions['wxBUILD_USE_STATIC_RUNTIME'] = 'MT' in str(
+                self.settings.compiler.runtime)
             cmake.definitions['wxBUILD_MSVC_MULTIPROC'] = True
         if self.settings.os != 'Windows':
             cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
@@ -192,6 +199,7 @@ class wxWidgetsConan(ConanFile):
         return cmake
 
     def build(self):
+        self.source()
         cmake = self.configure_cmake()
         cmake.build()
 
@@ -279,7 +287,8 @@ class wxWidgetsConan(ConanFile):
             self.add_libraries_from_pc('x11')
             self.cpp_info.libs.extend(['dl', 'pthread'])
         elif self.settings.os == 'Macos':
-            self.cpp_info.defines.extend(['__WXMAC__', '__WXOSX__', '__WXOSX_COCOA__'])
+            self.cpp_info.defines.extend(
+                ['__WXMAC__', '__WXOSX__', '__WXOSX_COCOA__'])
             for framework in ['Carbon',
                               'Cocoa',
                               'AudioToolbox',
